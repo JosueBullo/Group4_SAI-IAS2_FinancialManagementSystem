@@ -1,0 +1,123 @@
+Dashboard.css
+
+/* General styles */
+body {
+    font-family: Arial, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fa; /* Light background for the dashboard */
+}
+
+.flex {
+    display: flex;
+}
+
+/* Header styles */
+header {
+    background-color: #007bff; /* Bootstrap primary color */
+    color: white;
+    padding: 16px;
+    text-align: center;
+}
+
+/* Sidebar styles */
+aside {
+    background-color: #343a40; /* Dark background for sidebar */
+    color: white;
+    width: 250px; /* Fixed width for sidebar */
+    padding: 20px;
+}
+
+aside h2 {
+    margin: 0 0 20px 0; /* Margin below the heading */
+}
+
+aside a {
+    color: #ffffff; /* White links */
+    text-decoration: none; /* Remove underline */
+    display: block; /* Make links fill the width */
+    padding: 10px 0; /* Padding for clickable area */
+}
+
+aside a:hover {
+    background-color: #495057; /* Hover effect */
+}
+
+/* Main content area styles */
+.flex-1 {
+    flex: 1;
+    padding: 20px; /* Padding for main content area */
+}
+
+/* Dashboard content styles */
+.dashboard {
+    text-align: center;
+    margin-top: 20px; /* Margin above the dashboard content */
+}
+
+.dashboard-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 20px; /* Space between buttons */
+    margin-bottom: 20px; /* Margin below buttons */
+}
+
+.dashboard-button {
+    background-color: #007bff; /* Primary button color */
+    color: white;
+    padding: 12px 24px; /* Button padding */
+    border-radius: 5px; /* Rounded corners */
+    text-decoration: none; /* Remove underline */
+    transition: background-color 0.3s; /* Transition for hover effect */
+}
+
+.dashboard-button:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
+
+/* Card styles */
+.card {
+    background-color: white; /* Card background */
+    border-radius: 5px; /* Rounded corners */
+    padding: 20px; /* Card padding */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+    margin-bottom: 20px; /* Space below cards */
+}
+
+.card h3 {
+    margin: 0; /* Remove margin for title */
+}
+
+.card p {
+    font-size: 1.5em; /* Larger font for data display */
+    color: #333; /* Dark text for contrast */
+}
+
+/* Chart styles */
+.chart-container {
+    margin-top: 20px; /* Margin above chart */
+    background-color: white; /* Chart background */
+    border-radius: 5px; /* Rounded corners */
+    padding: 20px; /* Padding for chart */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Responsive styles */
+@media (max-width: 768px) {
+    .flex {
+        flex-direction: column; /* Stack sidebar and main content on small screens */
+    }
+
+    aside {
+        width: 100%; /* Sidebar takes full width on small screens */
+    }
+
+    .dashboard-buttons {
+        flex-direction: column; /* Stack buttons vertically */
+    }
+
+    .dashboard-button {
+        width: 100%; /* Buttons take full width */
+        margin-bottom: 10px; /* Space between buttons */
+    }
+}

@@ -83,6 +83,10 @@
 //         XLSX.writeFile(workbook, 'expense-report.xlsx');
 //     };
 
+//     const calculateTotalExpenses = () => {
+//         return expenses.reduce((total, expense) => total + Number(expense.amount), 0);
+//     };
+
 //     const chartData = useMemo(() => ({
 //         labels: expenses.map(expense => expense.category),
 //         datasets: [{
@@ -137,12 +141,14 @@
 //             <ul style={{ listStyleType: 'none', padding: '0' }}>
 //                 {expenses.map((expense) => (
 //                     <li key={expense.id} style={{ marginBottom: '10px' }}>
-//                         {expense.amount} - {expense.category} - {expense.description} - {expense.date}
+//                        ₱ {expense.amount} - {expense.category} - {expense.description} - {expense.date}
 //                         <button onClick={() => handleEdit(expense)} style={{ marginLeft: '10px' }}>Edit</button>
 //                         <button onClick={() => handleDelete(expense.id)} style={{ marginLeft: '5px' }}>Delete</button>
 //                     </li>
 //                 ))}
 //             </ul>
+
+//             <h3>Total Expenses: ₱ {calculateTotalExpenses()}</h3>
 
 //             <button onClick={exportToPDF} style={{ marginRight: '10px' }}>Export to PDF</button>
 //             <button onClick={exportToExcel}>Export to Excel</button>
@@ -167,14 +173,16 @@
 // };
 
 // export default ExpensePage;
-
-
 import React, { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import axios from 'axios';
-import jsPDF from 'jspdf'; 
+import jsPDF from 'jspdf';
 import * as XLSX from 'xlsx';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import 'bootstrap/dist/css/bootstrap.min.css';
+import '@fortawesome/fontawesome-free/css/all.min.css';
+import './Dashboard.css';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -266,70 +274,93 @@ const ExpensePage = () => {
     }), [expenses]);
 
     return (
-        <div style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
-            <h1>Expense Management</h1>
-            <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
-                <input
-                    type="number"
-                    name="amount"
-                    placeholder="Amount"
-                    value={formData.amount}
-                    onChange={handleInputChange}
-                    required
-                    style={{ marginRight: '10px' }}
-                />
-                <input
-                    type="text"
-                    name="category"
-                    placeholder="Category"
-                    value={formData.category}
-                    onChange={handleInputChange}
-                    required
-                    style={{ marginRight: '10px' }}
-                />
-                <input
-                    type="text"
-                    name="description"
-                    placeholder="Description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    style={{ marginRight: '10px' }}
-                />
-                <input
-                    type="date"
-                    name="date"
-                    value={formData.date}
-                    onChange={handleInputChange}
-                    required
-                    style={{ marginRight: '10px' }}
-                />
-                <button type="submit">{editingId ? 'Update' : 'Add'} Expense</button>
+        <div className="container-fluid dashboard">
+            <header className="text-center my-4">
+                <h1 className="display-4 text-danger">Expense Management</h1>
+                <p className="lead text-secondary">Track and manage your expenses</p>
+            </header>
+
+            <div className="d-flex justify-content-end mb-4">
+                <Link to="/dashboard" className="btn btn-outline-secondary btn-sm">
+                    <i className="fas fa-arrow-left me-2"></i> Back to Dashboard
+                </Link>
+            </div>
+
+            <form onSubmit={handleSubmit} className="mb-4">
+                <div className="row g-3">
+                    <div className="col-md-3">
+                        <input
+                            type="number"
+                            name="amount"
+                            placeholder="Amount"
+                            value={formData.amount}
+                            onChange={handleInputChange}
+                            className="form-control"
+                            required
+                        />
+                    </div>
+                    <div className="col-md-3">
+                        <input
+                            type="text"
+                            name="category"
+                            placeholder="Category"
+                            value={formData.category}
+                            onChange={handleInputChange}
+                            className="form-control"
+                            required
+                        />
+                    </div>
+                    <div className="col-md-3">
+                        <input
+                            type="text"
+                            name="description"
+                            placeholder="Description"
+                            value={formData.description}
+                            onChange={handleInputChange}
+                            className="form-control"
+                        />
+                    </div>
+                    <div className="col-md-3">
+                        <input
+                            type="date"
+                            name="date"
+                            value={formData.date}
+                            onChange={handleInputChange}
+                            className="form-control"
+                            required
+                        />
+                    </div>
+                </div>
+                <button type="submit" className="btn btn-danger mt-3">{editingId ? 'Update' : 'Add'} Expense</button>
             </form>
 
-            <h2>Expenses List</h2>
-            <ul style={{ listStyleType: 'none', padding: '0' }}>
+            <h2 className="text-center text-danger">Expenses List</h2>
+            <ul className="list-group mb-4">
                 {expenses.map((expense) => (
-                    <li key={expense.id} style={{ marginBottom: '10px' }}>
-                       ₱ {expense.amount} - {expense.category} - {expense.description} - {expense.date}
-                        <button onClick={() => handleEdit(expense)} style={{ marginLeft: '10px' }}>Edit</button>
-                        <button onClick={() => handleDelete(expense.id)} style={{ marginLeft: '5px' }}>Delete</button>
+                    <li key={expense.id} className="list-group-item d-flex justify-content-between align-items-center">
+                        ₱ {expense.amount} - {expense.category} - {expense.description} - {expense.date}
+                        <div>
+                            <button onClick={() => handleEdit(expense)} className="btn btn-sm btn-outline-primary me-2">Edit</button>
+                            <button onClick={() => handleDelete(expense.id)} className="btn btn-sm btn-outline-danger">Delete</button>
+                        </div>
                     </li>
                 ))}
             </ul>
 
-            <h3>Total Expenses: ₱ {calculateTotalExpenses()}</h3>
+            <h3 className="text-center text-danger">Total Expenses: ₱ {calculateTotalExpenses()}</h3>
 
-            <button onClick={exportToPDF} style={{ marginRight: '10px' }}>Export to PDF</button>
-            <button onClick={exportToExcel}>Export to Excel</button>
+            <div className="d-flex justify-content-center my-4">
+                <button onClick={exportToPDF} className="btn btn-outline-secondary me-3">Export to PDF</button>
+                <button onClick={exportToExcel} className="btn btn-outline-secondary">Export to Excel</button>
+            </div>
 
-            <h2>Expense Chart</h2>
-            <div style={{ maxWidth: '600px', margin: 'auto' }}>
+            <h2 className="text-center text-danger">Expense Chart</h2>
+            <div className="chart-container" style={{ maxWidth: '600px', margin: 'auto' }}>
                 <Bar 
                     data={chartData} 
                     options={{ 
                         responsive: true, 
                         maintainAspectRatio: true,
-                        aspectRatio: 2,
                         scales: {
                             x: { title: { display: true, text: 'Category' } },
                             y: { title: { display: true, text: 'Amount' } }
