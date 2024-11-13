@@ -241,7 +241,7 @@ const ExpensePage = () => {
 
     const exportToPDF = () => {
         const doc = new jsPDF();
-        doc.setFontSize(18);
+        doc.setFontSize(13);
         doc.text('Expense Report', 14, 20);
         let y = 30;
 
@@ -281,7 +281,7 @@ const ExpensePage = () => {
             </header>
 
             <div className="d-flex justify-content-end mb-4">
-                <Link to="/dashboard" className="btn btn-outline-secondary btn-sm">
+                <Link to="/" className="btn btn-outline-secondary btn-sm">
                     <i className="fas fa-arrow-left me-2"></i> Back to Dashboard
                 </Link>
             </div>

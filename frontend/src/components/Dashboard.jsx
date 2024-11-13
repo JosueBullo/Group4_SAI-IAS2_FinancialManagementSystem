@@ -103,14 +103,14 @@ const Dashboard = () => {
     return (
         <div className="container-fluid dashboard">
             <header className="text-center my-4">
-                <h1 className="display-4 text-primary">Financial Dashboard</h1>
+                <h1 className="display-4 text-primary">Financial Management System</h1>
                 <p className="lead text-secondary">Overview of your financial data at a glance</p>
             </header>
             
             <div className="row mb-4 justify-content-center">
                 <div className="col d-flex justify-content-center gap-3">
                     <Link to="/income" className="btn btn-outline-primary btn-lg">
-                        <i className="fas fa-dollar-sign me-2"></i> Income
+                        <i className="fas fa-peso-sign me-2"></i> Income
                     </Link>
                     <Link to="/expense" className="btn btn-outline-danger btn-lg">
                         <i className="fas fa-money-bill-wave me-2"></i> Expense
@@ -131,8 +131,8 @@ const Dashboard = () => {
                             <h2 className="card-title text-primary">Total Income vs Total Expense</h2>
                             <TotalChart totalIncome={totalIncome} totalExpense={totalExpense} />
                             <div className="mt-3">
-                                <span className="badge bg-primary p-2 me-2">Income: ${totalIncome}</span>
-                                <span className="badge bg-danger p-2">Expense: ${totalExpense}</span>
+                                <span className="badge bg-primary p-2 me-2">Income: ₱{totalIncome}</span>
+                                <span className="badge bg-danger p-2">Expense: ₱{totalExpense}</span>
                             </div>
                         </div>
                     </div>

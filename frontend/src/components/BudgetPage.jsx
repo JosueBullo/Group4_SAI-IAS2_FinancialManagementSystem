@@ -413,6 +413,7 @@ import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Pie } from 'react-chartjs-2';
 import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
 
 // Registering necessary components for Chart.js
 ChartJS.register(ArcElement, Tooltip, Legend);
@@ -422,6 +423,8 @@ const BudgetPage = () => {
     const [newEntry, setNewEntry] = useState({ category: '', amount: '', month: '' });
     const [editingId, setEditingId] = useState(null);
     const [error, setError] = useState(null);
+
+    const navigate = useNavigate(); // Initialize navigate
 
     // Fetch all budget entries
     const fetchBudgets = async () => {
@@ -450,7 +453,6 @@ const BudgetPage = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
-            // Ensure the month is in 'YYYY-MM-DD' format
             const formattedMonth = newEntry.month ? `${newEntry.month}-01` : '';
 
             const updatedEntry = {
@@ -459,13 +461,11 @@ const BudgetPage = () => {
             };
 
             if (editingId) {
-                // Update existing entry
                 await axios.put(`http://127.0.0.1:8000/api/budget/${editingId}/`, updatedEntry, {
                     headers: { 'Content-Type': 'application/json' }
                 });
                 alert('Budget entry updated successfully!');
             } else {
-                // Create new entry
                 await axios.post('http://127.0.0.1:8000/api/budget/', updatedEntry, {
                     headers: { 'Content-Type': 'application/json' }
                 });
@@ -502,7 +502,7 @@ const BudgetPage = () => {
         const monthlyData = {};
 
         budgets.forEach(budget => {
-            const monthKey = budget.month; // Assuming month is in 'YYYY-MM-DD' format
+            const monthKey = budget.month;
             if (!monthlyData[monthKey]) {
                 monthlyData[monthKey] = {};
             }
@@ -512,8 +512,7 @@ const BudgetPage = () => {
             monthlyData[monthKey][budget.category] += budget.amount;
         });
 
-        // Prepare labels and datasets for the pie chart
-        const labels = Object.keys(monthlyData).sort(); // Sort months
+        const labels = Object.keys(monthlyData).sort();
         const datasets = [{
             data: [],
             backgroundColor: [],
@@ -523,7 +522,7 @@ const BudgetPage = () => {
             const monthData = monthlyData[month];
             const totalAmount = Object.values(monthData).reduce((a, b) => a + b, 0);
             datasets[0].data.push(totalAmount);
-            datasets[0].backgroundColor.push(`hsl(${Math.random() * 360}, 70%, 60%)`); // Soft random pastel colors
+            datasets[0].backgroundColor.push(`hsl(${Math.random() * 360}, 70%, 60%)`);
         });
 
         return { labels, datasets };
@@ -535,10 +534,12 @@ const BudgetPage = () => {
         <div className="container-fluid bg-light min-vh-100">
             <div className="row justify-content-center py-5">
                 <div className="col-12 col-md-8">
-                    <div className="text-center mb-4">
+                    <div className="d-flex justify-content-between align-items-center mb-4">
                         <h1 className="display-4 text-primary">Budget Management</h1>
-                        {error && <div className="alert alert-danger">{JSON.stringify(error)}</div>}
+                        <button className="btn btn-secondary" onClick={() => navigate('/    ')}>Back to Dashboard</button>
                     </div>
+
+                    {error && <div className="alert alert-danger">{JSON.stringify(error)}</div>}
 
                     {/* Budget Form */}
                     <div className="card shadow-sm mb-4 border-light">

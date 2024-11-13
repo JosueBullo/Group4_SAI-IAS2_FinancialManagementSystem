@@ -134,24 +134,27 @@
 
 // export default SummaryReport;
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom'; // Import useNavigate for navigation
 import axios from 'axios';
-import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
+import { Pie, Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js';
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
-import * as XLSX from 'xlsx'; // Import XLSX for Excel export
+import * as XLSX from 'xlsx';
 
-ChartJS.register(ArcElement, Tooltip, Legend);
+ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
 const SummaryReport = () => {
+    const navigate = useNavigate(); // Initialize navigate for navigation
     const [income, setIncome] = useState([]);
     const [expenses, setExpenses] = useState([]);
     const [budgets, setBudgets] = useState([]);
+    const [expenseCategories, setExpenseCategories] = useState({});
     const [totalIncome, setTotalIncome] = useState(0);
     const [totalExpenses, setTotalExpenses] = useState(0);
     const [totalBudget, setTotalBudget] = useState(0);
-    const [loading, setLoading] = useState(true);  // Loading state
-    const [error, setError] = useState(null);      // Error state
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     const fetchData = async () => {
         try {
@@ -182,6 +185,14 @@ const SummaryReport = () => {
         setTotalIncome(totalIncomeValue);
         setTotalExpenses(totalExpensesValue);
         setTotalBudget(totalBudgetValue);
+
+        const categoryData = expenses.reduce((acc, curr) => {
+            const category = curr.category || 'Uncategorized';
+            if (!acc[category]) acc[category] = 0;
+            acc[category] += parseFloat(curr.amount);
+            return acc;
+        }, {});
+        setExpenseCategories(categoryData);
     }, [income, expenses, budgets]);
 
     const chartData = {
@@ -205,7 +216,19 @@ const SummaryReport = () => {
         ],
     };
 
-    // Function to export the summary to PDF
+    const categoryChartData = {
+        labels: Object.keys(expenseCategories),
+        datasets: [
+            {
+                label: 'Expenses by Category',
+                data: Object.values(expenseCategories),
+                backgroundColor: 'rgba(54, 162, 235, 0.6)',
+                borderColor: 'rgba(54, 162, 235, 1)',
+                borderWidth: 1,
+            },
+        ],
+    };
+
     const exportToPDF = () => {
         const pdf = new jsPDF();
         const input = document.getElementById('summaryReport');
@@ -233,7 +256,6 @@ const SummaryReport = () => {
         });
     };
 
-    // Function to export data to Excel
     const exportToExcel = () => {
         const ws = XLSX.utils.json_to_sheet([
             { Description: 'Total Income', Amount: totalIncome.toFixed(2) },
@@ -255,36 +277,12 @@ const SummaryReport = () => {
         return <div style={{ color: 'red', textAlign: 'center' }}>{error}</div>;
     }
 
-    // Style for the button container
-    const buttonContainerStyle = {
-        textAlign: 'center',
-        marginTop: '20px',
-    };
-
-    // Inline styling for buttons
-    const buttonStyle = (bgColor) => ({
-        padding: '10px 20px',
-        backgroundColor: bgColor,
-        color: 'white',
-        border: 'none',
-        borderRadius: '5px',
-        cursor: 'pointer',
-        fontSize: '16px',
-        boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)',
-        transition: 'all 0.3s ease',
-    });
-
-    // Hover effect for buttons
-    const hoverButtonStyle = (bgColor) => ({
-        ...buttonStyle(bgColor),
-        ':hover': {
-            backgroundColor: `${bgColor}d9`,
-        },
-    });
-
     return (
         <div style={{ padding: '30px', maxWidth: '900px', margin: 'auto', backgroundColor: '#f9f9f9', borderRadius: '8px', boxShadow: '0px 4px 8px rgba(0, 0, 0, 0.1)' }} id="summaryReport">
             <h1 style={{ textAlign: 'center', color: '#4CAF50', fontSize: '28px' }}>Summary Report</h1>
+            <button onClick={() => navigate('/')} style={{ padding: '10px 20px', backgroundColor: '#FF5722', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px', marginLeft: '10px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', transition: 'all 0.3s ease' }}>
+                    Back to Home
+                </button>
             <div style={{ marginBottom: '30px', fontSize: '20px', padding: '20px', backgroundColor: '#fff', borderRadius: '8px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)' }}>
                 <h2 style={{ fontSize: '22px' }}>Total Income: ${totalIncome.toFixed(2)}</h2>
                 <h2 style={{ fontSize: '22px' }}>Total Expenses: ${totalExpenses.toFixed(2)}</h2>
@@ -292,20 +290,33 @@ const SummaryReport = () => {
                 <h2 style={{ color: totalIncome - totalExpenses < 0 ? 'red' : 'green', fontSize: '22px' }}>
                     Balance: ${(totalIncome - totalExpenses).toFixed(2)}
                 </h2>
+                <div style={{ marginTop: '20px' }}>
+                    <h3>Expense Breakdown by Category:</h3>
+                    <ul style={{ listStyleType: 'none', padding: 0 }}>
+                        {Object.entries(expenseCategories).map(([category, amount]) => (
+                            <li key={category} style={{ fontSize: '18px' }}>
+                                {category}: ${amount.toFixed(2)}
+                            </li>
+                        ))}
+                    </ul>
+                </div>
             </div>
 
-            {/* Pie Chart */}
             <h2 style={{ textAlign: 'center', marginTop: '30px', fontSize: '24px', color: '#333' }}>Financial Overview</h2>
-            <div style={{ marginTop: '30px' }}>
-                <Pie data={chartData} />
+            <div style={{ marginTop: '30px', display: 'flex', justifyContent: 'space-around' }}>
+                <div style={{ width: '45%', maxWidth: '400px' }}>
+                    <Pie data={chartData} />
+                </div>
+                <div style={{ width: '45%', maxWidth: '400px' }}>
+                    <Bar data={categoryChartData} options={{ maintainAspectRatio: true, responsive: true }} />
+                </div>
             </div>
 
-            {/* Buttons for Export */}
-            <div style={buttonContainerStyle}>
-                <button onClick={exportToPDF} style={buttonStyle('#4CAF50')}>
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                <button onClick={exportToPDF} style={{ padding: '10px 20px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', transition: 'all 0.3s ease' }}>
                     Export to PDF
                 </button>
-                <button onClick={exportToExcel} style={{ ...buttonStyle('#007BFF'), marginLeft: '15px' }}>
+                <button onClick={exportToExcel} style={{ padding: '10px 20px', backgroundColor: '#2196F3', color: 'white', border: 'none', borderRadius: '5px', cursor: 'pointer', fontSize: '16px', marginLeft: '10px', boxShadow: '0px 4px 6px rgba(0, 0, 0, 0.1)', transition: 'all 0.3s ease' }}>
                     Export to Excel
                 </button>
             </div>

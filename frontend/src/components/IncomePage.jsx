@@ -252,7 +252,7 @@ const IncomePage = () => {
 
     const exportToPDF = () => {
         const doc = new jsPDF();
-        doc.setFontSize(18);
+        doc.setFontSize(13);
         doc.text('Income Report', 14, 20);
         let y = 30;
 
@@ -293,7 +293,7 @@ const IncomePage = () => {
 
             <div className="row mb-4 justify-content-center">
                 <div className="col d-flex justify-content-center gap-3">
-                    <Link to="/dashboard" className="btn btn-outline-secondary btn-lg">
+                    <Link to="/" className="btn btn-outline-secondary btn-lg">
                         <i className="fas fa-arrow-left me-2"></i> Back to Dashboard
                     </Link>
                 </div>
