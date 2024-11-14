@@ -32,6 +32,12 @@ INSTALLED_APPS = [
     
 ]
 
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+}
+
 MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
@@ -69,28 +75,28 @@ WSGI_APPLICATION = 'sia.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
 DATABASES = {
     'default': {
-        'ENGINE': 'djongo',
-        'NAME': 'my_database',  # Replace with your database name
-        'ENFORCE_SCHEMA': False,
-        'CLIENT': {
-            'host': 'mongodb+srv://kirstientruiz:kurtporley@django-react.o8bow.mongodb.net/my_database?retryWrites=true&w=majority',  # Include your database name in the URL
-            'port': 27017,
-            'username': "kirstientruiz",
-            'password': "kurtporley",
-            'authSource': 'admin'
-            # No need to specify username and password here if they are in the connection string
-        }
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
     }
 }
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'djongo',
+#         'NAME': 'my_database',  # Replace with your database name
+#         'ENFORCE_SCHEMA': False,
+#         'CLIENT': {
+#             'host': 'mongodb+srv://kirstientruiz:kurtporley@django-react.o8bow.mongodb.net/my_database?retryWrites=true&w=majority',  # Include your database name in the URL
+#             'port': 27017,
+#             'username': "kirstientruiz",
+#             'password': "kurtporley",
+#             'authSource': 'admin'
+#             # No need to specify username and password here if they are in the connection string
+#         }
+#     }
+# }
 
 
 
