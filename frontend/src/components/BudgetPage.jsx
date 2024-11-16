@@ -1,422 +1,23 @@
-
-
-// import React, { useState, useEffect } from 'react';
-// import axios from 'axios';
-// import { Pie } from 'react-chartjs-2';
-// import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-
-// // Registering necessary components for Chart.js
-// ChartJS.register(ArcElement, Tooltip, Legend);
-
-// const BudgetPage = () => {
-//     const [budgets, setBudgets] = useState([]);
-//     const [newEntry, setNewEntry] = useState({ category: '', amount: '', month: '' });
-//     const [editingId, setEditingId] = useState(null);
-//     const [error, setError] = useState(null);
-
-//     // Fetch all budget entries
-//     const fetchBudgets = async () => {
-//         try {
-//             const response = await axios.get('http://127.0.0.1:8000/api/budget/');
-//             setBudgets(response.data);
-//         } catch (error) {
-//             console.error('Error fetching budgets:', error);
-//         }
-//     };
-
-//     useEffect(() => {
-//         fetchBudgets();
-//     }, []);
-
-//     // Handle input changes
-//     const handleChange = (e) => {
-//         const { name, value } = e.target;
-//         setNewEntry({
-//             ...newEntry,
-//             [name]: value
-//         });
-//     };
-
-//     // Handle form submission for adding or updating
-//     const handleSubmit = async (e) => {
-//         e.preventDefault();
-//         try {
-//             if (editingId) {
-//                 // Update existing entry
-//                 await axios.put(`http://127.0.0.1:8000/api/budget/${editingId}/`, newEntry, {
-//                     headers: { 'Content-Type': 'application/json' }
-//                 });
-//                 alert('Budget entry updated successfully!');
-//             } else {
-//                 // Create new entry
-//                 await axios.post('http://127.0.0.1:8000/api/budget/', newEntry, {
-//                     headers: { 'Content-Type': 'application/json' }
-//                 });
-//                 alert('Budget entry saved successfully!');
-//             }
-//             setNewEntry({ category: '', amount: '', month: '' });
-//             setEditingId(null);
-//             fetchBudgets();
-//         } catch (error) {
-//             setError(error.response ? error.response.data : 'An error occurred');
-//             console.error('Error saving budget entry:', error.response ? error.response.data : error);
-//         }
-//     };
-
-//     // Handle deleting a budget entry
-//     const handleDelete = async (id) => {
-//         try {
-//             await axios.delete(`http://127.0.0.1:8000/api/budget/${id}/`);
-//             alert('Budget entry deleted successfully!');
-//             fetchBudgets();
-//         } catch (error) {
-//             console.error('Error deleting budget entry:', error);
-//         }
-//     };
-
-//     // Handle editing a budget entry
-//     const handleEdit = (budget) => {
-//         setNewEntry(budget);
-//         setEditingId(budget.id);
-//     };
-
-//     // Prepare data for the monthly pie chart
-//     const prepareChartData = () => {
-//         const monthlyData = {};
-
-//         budgets.forEach(budget => {
-//             const monthKey = budget.month; // Assuming month is in 'YYYY-MM' format
-//             if (!monthlyData[monthKey]) {
-//                 monthlyData[monthKey] = {};
-//             }
-//             if (!monthlyData[monthKey][budget.category]) {
-//                 monthlyData[monthKey][budget.category] = 0;
-//             }
-//             monthlyData[monthKey][budget.category] += budget.amount;
-//         });
-
-//         // Prepare labels and datasets for the pie chart
-//         const labels = Object.keys(monthlyData).sort(); // Sort months
-//         const datasets = [{
-//             data: [],
-//             backgroundColor: [],
-//         }];
-
-//         labels.forEach(month => {
-//             const monthData = monthlyData[month];
-//             const totalAmount = Object.values(monthData).reduce((a, b) => a + b, 0);
-//             datasets[0].data.push(totalAmount);
-//             datasets[0].backgroundColor.push(`hsl(${Math.random() * 360}, 70%, 50%)`); // Random colors
-//         });
-
-//         return { labels, datasets };
-//     };
-
-//     const { labels, datasets } = prepareChartData();
-
-//     return (
-//         <div style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
-//             <h1>Budget Management</h1>
-//             {error && <div style={{ color: 'red', marginBottom: '10px' }}>Error: {JSON.stringify(error)}</div>}
-//             <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
-//                 <div style={{ marginBottom: '10px' }}>
-//                     <label>Category:</label>
-//                     <input
-//                         type="text"
-//                         name="category"
-//                         value={newEntry.category}
-//                         onChange={handleChange}
-//                         required
-//                         style={{ marginLeft: '10px' }}
-//                     />
-//                 </div>
-//                 <div style={{ marginBottom: '10px' }}>
-//                     <label>Amount:</label>
-//                     <input
-//                         type="number"
-//                         name="amount"
-//                         value={newEntry.amount}
-//                         onChange={handleChange}
-//                         required
-//                         style={{ marginLeft: '10px' }}
-//                     />
-//                 </div>
-//                 <div style={{ marginBottom: '10px' }}>
-//                     <label>Month:</label>
-//                     <input
-//                         type="month"
-//                         name="month"
-//                         value={newEntry.month}
-//                         onChange={handleChange}
-//                         required
-//                         style={{ marginLeft: '10px' }}
-//                     />
-//                 </div>
-//                 <button type="submit" style={{ marginRight: '10px' }}>
-//                     {editingId ? 'Update Entry' : 'Add Entry'}
-//                 </button>
-//                 {editingId && (
-//                     <button type="button" onClick={() => {
-//                         setEditingId(null);
-//                         setNewEntry({ category: '', amount: '', month: '' });
-//                     }}>
-//                         Cancel
-//                     </button>
-//                 )}
-//             </form>
-
-//             <h2>Budget Entries</h2>
-//             <table border="1" cellPadding="10" style={{ width: '100%', borderCollapse: 'collapse' }}>
-//                 <thead>
-//                     <tr>
-//                         <th>Category</th>
-//                         <th>Amount</th>
-//                         <th>Month</th>
-//                         <th>Actions</th>
-//                     </tr>
-//                 </thead>
-//                 <tbody>
-//                     {budgets.map((budget) => (
-//                         <tr key={budget.id}>
-//                             <td>{budget.category}</td>
-//                             <td>{budget.amount}</td>
-//                             <td>{budget.month}</td>
-//                             <td>
-//                                 <button onClick={() => handleEdit(budget)}>Edit</button>
-//                                 <button onClick={() => handleDelete(budget.id)} style={{ marginLeft: '10px' }}>Delete</button>
-//                             </td>
-//                         </tr>
-//                     ))}
-//                 </tbody>
-//             </table>
-
-//             <h2>Monthly Budget Distribution</h2>
-//             <Pie data={{
-//                 labels: labels,
-//                 datasets: datasets,
-//             }} />
-//         </div>
-//     );
-// };
-
-// export default BudgetPage;
-
-// import React, { useState, useEffect } from 'react';
-// import axios from 'axios';
-// import { Pie } from 'react-chartjs-2';
-// import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-
-// // Registering necessary components for Chart.js
-// ChartJS.register(ArcElement, Tooltip, Legend);
-
-// const BudgetPage = () => {
-//     const [budgets, setBudgets] = useState([]);
-//     const [newEntry, setNewEntry] = useState({ category: '', amount: '', month: '' });
-//     const [editingId, setEditingId] = useState(null);
-//     const [error, setError] = useState(null);
-
-//     // Fetch all budget entries
-//     const fetchBudgets = async () => {
-//         try {
-//             const response = await axios.get('http://127.0.0.1:8000/api/budget/');
-//             setBudgets(response.data);
-//         } catch (error) {
-//             console.error('Error fetching budgets:', error);
-//         }
-//     };
-
-//     useEffect(() => {
-//         fetchBudgets();
-//     }, []);
-
-//     // Handle input changes
-//     const handleChange = (e) => {
-//         const { name, value } = e.target;
-//         setNewEntry({
-//             ...newEntry,
-//             [name]: value
-//         });
-//     };
-
-//     // Handle form submission for adding or updating
-//     const handleSubmit = async (e) => {
-//         e.preventDefault();
-//         try {
-//             // Ensure the month is in 'YYYY-MM-DD' format
-//             const formattedMonth = newEntry.month ? `${newEntry.month}-01` : '';
-
-//             const updatedEntry = {
-//                 ...newEntry,
-//                 month: formattedMonth,
-//             };
-
-//             if (editingId) {
-//                 // Update existing entry
-//                 await axios.put(`http://127.0.0.1:8000/api/budget/${editingId}/`, updatedEntry, {
-//                     headers: { 'Content-Type': 'application/json' }
-//                 });
-//                 alert('Budget entry updated successfully!');
-//             } else {
-//                 // Create new entry
-//                 await axios.post('http://127.0.0.1:8000/api/budget/', updatedEntry, {
-//                     headers: { 'Content-Type': 'application/json' }
-//                 });
-//                 alert('Budget entry saved successfully!');
-//             }
-//             setNewEntry({ category: '', amount: '', month: '' });
-//             setEditingId(null);
-//             fetchBudgets();
-//         } catch (error) {
-//             setError(error.response ? error.response.data : 'An error occurred');
-//             console.error('Error saving budget entry:', error.response ? error.response.data : error);
-//         }
-//     };
-
-//     // Handle deleting a budget entry
-//     const handleDelete = async (id) => {
-//         try {
-//             await axios.delete(`http://127.0.0.1:8000/api/budget/${id}/`);
-//             alert('Budget entry deleted successfully!');
-//             fetchBudgets();
-//         } catch (error) {
-//             console.error('Error deleting budget entry:', error);
-//         }
-//     };
-
-//     // Handle editing a budget entry
-//     const handleEdit = (budget) => {
-//         setNewEntry(budget);
-//         setEditingId(budget.id);
-//     };
-
-//     // Prepare data for the monthly pie chart
-//     const prepareChartData = () => {
-//         const monthlyData = {};
-
-//         budgets.forEach(budget => {
-//             const monthKey = budget.month; // Assuming month is in 'YYYY-MM-DD' format
-//             if (!monthlyData[monthKey]) {
-//                 monthlyData[monthKey] = {};
-//             }
-//             if (!monthlyData[monthKey][budget.category]) {
-//                 monthlyData[monthKey][budget.category] = 0;
-//             }
-//             monthlyData[monthKey][budget.category] += budget.amount;
-//         });
-
-//         // Prepare labels and datasets for the pie chart
-//         const labels = Object.keys(monthlyData).sort(); // Sort months
-//         const datasets = [{
-//             data: [],
-//             backgroundColor: [],
-//         }];
-
-//         labels.forEach(month => {
-//             const monthData = monthlyData[month];
-//             const totalAmount = Object.values(monthData).reduce((a, b) => a + b, 0);
-//             datasets[0].data.push(totalAmount);
-//             datasets[0].backgroundColor.push(`hsl(${Math.random() * 360}, 70%, 50%)`); // Random colors
-//         });
-
-//         return { labels, datasets };
-//     };
-
-//     const { labels, datasets } = prepareChartData();
-
-//     return (
-//         <div style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
-//             <h1>Budget Management</h1>
-//             {error && <div style={{ color: 'red', marginBottom: '10px' }}>Error: {JSON.stringify(error)}</div>}
-//             <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
-//                 <div style={{ marginBottom: '10px' }}>
-//                     <label>Category:</label>
-//                     <input
-//                         type="text"
-//                         name="category"
-//                         value={newEntry.category}
-//                         onChange={handleChange}
-//                         required
-//                         style={{ marginLeft: '10px' }}
-//                     />
-//                 </div>
-//                 <div style={{ marginBottom: '10px' }}>
-//                     <label>Amount:</label>
-//                     <input
-//                         type="number"
-//                         name="amount"
-//                         value={newEntry.amount}
-//                         onChange={handleChange}
-//                         required
-//                         style={{ marginLeft: '10px' }}
-//                     />
-//                 </div>
-//                 <div style={{ marginBottom: '10px' }}>
-//                     <label>Month:</label>
-//                     <input
-//                         type="month"
-//                         name="month"
-//                         value={newEntry.month}
-//                         onChange={handleChange}
-//                         required
-//                         style={{ marginLeft: '10px' }}
-//                     />
-//                 </div>
-//                 <button type="submit" style={{ marginRight: '10px' }}>
-//                     {editingId ? 'Update Entry' : 'Add Entry'}
-//                 </button>
-//                 {editingId && (
-//                     <button type="button" onClick={() => {
-//                         setEditingId(null);
-//                         setNewEntry({ category: '', amount: '', month: '' });
-//                     }}>
-//                         Cancel
-//                     </button>
-//                 )}
-//             </form>
-
-//             <h2>Budget Entries</h2>
-//             <table border="1" cellPadding="10" style={{ width: '100%', borderCollapse: 'collapse' }}>
-//                 <thead>
-//                     <tr>
-//                         <th>Category</th>
-//                         <th>Amount</th>
-//                         <th>Month</th>
-//                         <th>Actions</th>
-//                     </tr>
-//                 </thead>
-//                 <tbody>
-//                     {budgets.map((budget) => (
-//                         <tr key={budget.id}>
-//                             <td>{budget.category}</td>
-//                             <td>{budget.amount}</td>
-//                             <td>{budget.month}</td>
-//                             <td>
-//                                 <button onClick={() => handleEdit(budget)}>Edit</button>
-//                                 <button onClick={() => handleDelete(budget.id)} style={{ marginLeft: '10px' }}>Delete</button>
-//                             </td>
-//                         </tr>
-//                     ))}
-//                 </tbody>
-//             </table>
-
-//             <h2>Monthly Budget Distribution</h2>
-//             <Pie data={{
-//                 labels: labels,
-//                 datasets: datasets,
-//             }} />
-//         </div>
-//     );
-// };
-
-// export default BudgetPage;
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Pie } from 'react-chartjs-2';
-import { Chart as ChartJS, ArcElement, Tooltip, Legend } from 'chart.js';
-import { useNavigate } from 'react-router-dom'; // Import useNavigate from react-router-dom
+import { Bar } from 'react-chartjs-2';
+import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import { useNavigate } from 'react-router-dom';
+import './Budget.css';
 
-// Registering necessary components for Chart.js
-ChartJS.register(ArcElement, Tooltip, Legend);
+// Import libraries for Excel and PDF export
+import * as XLSX from 'xlsx';
+import { jsPDF } from 'jspdf';
+
+// Register chart elements
+ChartJS.register(
+    CategoryScale, 
+    LinearScale, 
+    BarElement, 
+    Title, 
+    Tooltip, 
+    Legend
+);
 
 const BudgetPage = () => {
     const [budgets, setBudgets] = useState([]);
@@ -424,9 +25,9 @@ const BudgetPage = () => {
     const [editingId, setEditingId] = useState(null);
     const [error, setError] = useState(null);
 
-    const navigate = useNavigate(); // Initialize navigate
+    const categories = ['Food', 'Entertainment', 'Rent', 'Utilities', 'Transportation', 'Healthcare'];
+    const navigate = useNavigate();
 
-    // Fetch all budget entries
     const fetchBudgets = async () => {
         try {
             const response = await axios.get('http://127.0.0.1:8000/api/budget/');
@@ -440,35 +41,24 @@ const BudgetPage = () => {
         fetchBudgets();
     }, []);
 
-    // Handle input changes
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setNewEntry({
-            ...newEntry,
-            [name]: value
-        });
+        setNewEntry({ ...newEntry, [name]: value });
     };
 
-    // Handle form submission for adding or updating
     const handleSubmit = async (e) => {
         e.preventDefault();
         try {
             const formattedMonth = newEntry.month ? `${newEntry.month}-01` : '';
-
-            const updatedEntry = {
-                ...newEntry,
-                month: formattedMonth,
+            const updatedEntry = { 
+                ...newEntry, 
+                month: formattedMonth 
             };
-
             if (editingId) {
-                await axios.put(`http://127.0.0.1:8000/api/budget/${editingId}/`, updatedEntry, {
-                    headers: { 'Content-Type': 'application/json' }
-                });
+                await axios.put(`http://127.0.0.1:8000/api/budget/${editingId}/`, updatedEntry);
                 alert('Budget entry updated successfully!');
             } else {
-                await axios.post('http://127.0.0.1:8000/api/budget/', updatedEntry, {
-                    headers: { 'Content-Type': 'application/json' }
-                });
+                await axios.post('http://127.0.0.1:8000/api/budget/', updatedEntry);
                 alert('Budget entry saved successfully!');
             }
             setNewEntry({ category: '', amount: '', month: '' });
@@ -476,11 +66,14 @@ const BudgetPage = () => {
             fetchBudgets();
         } catch (error) {
             setError(error.response ? error.response.data : 'An error occurred');
-            console.error('Error saving budget entry:', error.response ? error.response.data : error);
         }
     };
 
-    // Handle deleting a budget entry
+    const handleEdit = (budget) => {
+        setNewEntry(budget);
+        setEditingId(budget.id);
+    };
+
     const handleDelete = async (id) => {
         try {
             await axios.delete(`http://127.0.0.1:8000/api/budget/${id}/`);
@@ -491,170 +84,238 @@ const BudgetPage = () => {
         }
     };
 
-    // Handle editing a budget entry
-    const handleEdit = (budget) => {
-        setNewEntry(budget);
-        setEditingId(budget.id);
-    };
-
-    // Prepare data for the monthly pie chart
     const prepareChartData = () => {
         const monthlyData = {};
+        const allCategories = new Set();
 
-        budgets.forEach(budget => {
+        budgets.forEach((budget) => {
             const monthKey = budget.month;
-            if (!monthlyData[monthKey]) {
-                monthlyData[monthKey] = {};
-            }
-            if (!monthlyData[monthKey][budget.category]) {
-                monthlyData[monthKey][budget.category] = 0;
-            }
+            if (!monthlyData[monthKey]) monthlyData[monthKey] = {};
+            if (!monthlyData[monthKey][budget.category]) monthlyData[monthKey][budget.category] = 0;
             monthlyData[monthKey][budget.category] += budget.amount;
+            allCategories.add(budget.category);
         });
 
         const labels = Object.keys(monthlyData).sort();
-        const datasets = [{
-            data: [],
-            backgroundColor: [],
-        }];
-
-        labels.forEach(month => {
-            const monthData = monthlyData[month];
-            const totalAmount = Object.values(monthData).reduce((a, b) => a + b, 0);
-            datasets[0].data.push(totalAmount);
-            datasets[0].backgroundColor.push(`hsl(${Math.random() * 360}, 70%, 60%)`);
-        });
+        const datasets = Array.from(allCategories).map((category) => ({
+            label: category,
+            data: labels.map((month) => monthlyData[month][category] || 0),
+            backgroundColor: `hsl(${Math.random() * 360}, 70%, 60%)`,
+            borderColor: 'black',
+            borderWidth: 1,
+        }));
 
         return { labels, datasets };
     };
 
     const { labels, datasets } = prepareChartData();
 
+    // Export to Excel function
+    const exportToExcel = () => {
+        const ws = XLSX.utils.json_to_sheet(budgets);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Budgets');
+        XLSX.writeFile(wb, 'budgets.xlsx');
+    };
+
+    // Export to PDF function
+    const exportToPDF = () => {
+        const doc = new jsPDF();
+        doc.setFontSize(12);
+        doc.text('Monthly Budget', 10, 10);
+
+        const tableData = budgets.map(budget => [budget.category, budget.amount, budget.month]);
+        doc.autoTable({
+            head: [['Category', 'Amount', 'Month']],
+            body: tableData,
+            startY: 20,
+        });
+
+        doc.save('budgets.pdf');
+    };
+
     return (
-        <div className="container-fluid bg-light min-vh-100">
-            <div className="row justify-content-center py-5">
-                <div className="col-12 col-md-8">
-                    <div className="d-flex justify-content-between align-items-center mb-4">
-                        <h1 className="display-4 text-primary">Budget Management</h1>
-                        <button className="btn btn-secondary" onClick={() => navigate('/    ')}>Back to Dashboard</button>
-                    </div>
+        <div className="container-fluid bg-light py-5 min-vh-100">
+            {/* Header Section */}
+            <div className="row mb-4">
+                <div className="col-12 text-center">
+                    <h1 className="display-4 text-primary font-weight-bold small-title">Monthly Budget</h1>
+                    <p className="lead text-muted">Track your income and expenses with ease</p>
+                </div>
+            </div>
 
-                    {error && <div className="alert alert-danger">{JSON.stringify(error)}</div>}
+            {/* Back to Dashboard Button */}
+            <div className="row mb-4">
+                <div className="col-12 text-start">
+                    <button 
+                        className="btn btn-link text-dark" 
+                        onClick={() => navigate('/')}
+                    >
+                        <span className="bi bi-arrow-left-circle"></span> Back to Dashboard
+                    </button>
+                </div>
+            </div>
 
-                    {/* Budget Form */}
-                    <div className="card shadow-sm mb-4 border-light">
+            {/* Add/Edit Budget Form Section */}
+            <div className="row">
+                <div className="col-lg-6 col-md-12 mb-4">
+                    <div className="card shadow-lg rounded">
+                        <div className="card-header bg-primary text-white">
+                            <h4 className="mb-0">Add / Edit Budget Entry</h4>
+                        </div>
                         <div className="card-body">
-                            <h2 className="h4 mb-4 text-dark">Add or Edit Budget Entry</h2>
                             <form onSubmit={handleSubmit}>
                                 <div className="mb-3">
-                                    <label htmlFor="category" className="form-label text-muted">Category</label>
+                                    <label htmlFor="category" className="form-label">Category</label>
                                     <input
                                         type="text"
                                         id="category"
                                         name="category"
                                         value={newEntry.category}
                                         onChange={handleChange}
-                                        required
                                         className="form-control"
-                                        style={{ borderColor: '#ddd' }}
+                                        placeholder="Enter or select a category"
+                                        list="category-suggestions"
+                                        required
                                     />
+                                    <datalist id="category-suggestions">
+                                        {categories.map((category, index) => (
+                                            <option key={index} value={category} />
+                                        ))}
+                                    </datalist>
                                 </div>
                                 <div className="mb-3">
-                                    <label htmlFor="amount" className="form-label text-muted">Amount</label>
+                                    <label htmlFor="amount" className="form-label">Amount</label>
                                     <input
                                         type="number"
                                         id="amount"
                                         name="amount"
                                         value={newEntry.amount}
                                         onChange={handleChange}
-                                        required
                                         className="form-control"
-                                        style={{ borderColor: '#ddd' }}
+                                        required
                                     />
                                 </div>
                                 <div className="mb-3">
-                                    <label htmlFor="month" className="form-label text-muted">Month</label>
+                                    <label htmlFor="month" className="form-label">Month</label>
                                     <input
                                         type="month"
                                         id="month"
                                         name="month"
                                         value={newEntry.month}
                                         onChange={handleChange}
-                                        required
                                         className="form-control"
-                                        style={{ borderColor: '#ddd' }}
+                                        required
                                     />
                                 </div>
-                                <div className="d-flex justify-content-between">
-                                    <button type="submit" className="btn btn-primary">{editingId ? 'Update Entry' : 'Add Entry'}</button>
+                                <div className="d-grid gap-2">
+                                    <button type="submit" className="btn btn-success">
+                                        {editingId ? 'Update Entry' : 'Add Entry'}
+                                    </button>
                                     {editingId && (
                                         <button
                                             type="button"
-                                            onClick={() => {
-                                                setEditingId(null);
-                                                setNewEntry({ category: '', amount: '', month: '' });
-                                            }}
+                                            onClick={() => setEditingId(null)}
                                             className="btn btn-secondary"
                                         >
-                                            Cancel
+                                            Cancel Edit
                                         </button>
                                     )}
                                 </div>
                             </form>
                         </div>
                     </div>
+                </div>
 
-                    {/* Budget Entries Table */}
-                    <div className="card shadow-sm border-light">
+                {/* Budget Entries Table Section */}
+                <div className="col-lg-6 col-md-12 mb-4">
+                    <div className="card shadow-lg rounded">
+                        <div className="card-header bg-primary text-white">
+                            <h4 className="mb-0">Budget Entries</h4>
+                        </div>
                         <div className="card-body">
-                            <h2 className="h4 text-center mb-4 text-dark">Budget Entries</h2>
-                            <div className="table-responsive">
-                                <table className="table table-bordered table-striped">
-                                    <thead className="table-light">
-                                        <tr>
-                                            <th>Category</th>
-                                            <th>Amount</th>
-                                            <th>Month</th>
-                                            <th>Actions</th>
+                            <table className="table table-hover">
+                                <thead>
+                                    <tr>
+                                        <th>Category</th>
+                                        <th>Amount</th>
+                                        <th>Month</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {budgets.map((budget) => (
+                                        <tr key={budget.id}>
+                                            <td>{budget.category}</td>
+                                            <td>{budget.amount}</td>
+                                            <td>{budget.month}</td>
+                                            <td>
+                                                <button
+                                                    className="btn btn-warning btn-sm me-2"
+                                                    onClick={() => handleEdit(budget)}
+                                                >
+                                                    Edit
+                                                </button>
+                                                <button
+                                                    className="btn btn-danger btn-sm"
+                                                    onClick={() => handleDelete(budget.id)}
+                                                >
+                                                    Delete
+                                                </button>
+                                            </td>
                                         </tr>
-                                    </thead>
-                                    <tbody>
-                                        {budgets.map((budget) => (
-                                            <tr key={budget.id}>
-                                                <td>{budget.category}</td>
-                                                <td>{budget.amount}</td>
-                                                <td>{budget.month}</td>
-                                                <td>
-                                                    <button
-                                                        onClick={() => handleEdit(budget)}
-                                                        className="btn btn-warning btn-sm me-2"
-                                                    >
-                                                        Edit
-                                                    </button>
-                                                    <button
-                                                        onClick={() => handleDelete(budget.id)}
-                                                        className="btn btn-danger btn-sm"
-                                                    >
-                                                        Delete
-                                                    </button>
-                                                </td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
-                            </div>
+                                    ))}
+                                </tbody>
+                            </table>
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    {/* Pie Chart */}
-                    <div className="card shadow-sm mt-4 border-light">
+            {/* Budget Breakdown Chart Section */}
+            <div className="row">
+                <div className="col-12">
+                    <div className="card shadow-lg rounded">
+                        <div className="card-header bg-primary text-white">
+                            <h4 className="mb-0">Budget Breakdown</h4>
+                        </div>
                         <div className="card-body">
-                            <h2 className="h4 text-center mb-4 text-dark">Monthly Budget Breakdown</h2>
-                            <div className="d-flex justify-content-center">
-                                <Pie data={{ labels, datasets }} options={{ responsive: true }} />
-                            </div>
+                            <Bar 
+                                data={{ labels, datasets }} 
+                                options={{
+                                    responsive: true,
+                                    plugins: {
+                                        legend: { position: 'top' },
+                                        title: { display: true, text: 'Budget Breakdown per Month' },
+                                    },
+                                    scales: {
+                                        x: { title: { display: true, text: 'Month' } },
+                                        y: { title: { display: true, text: 'Amount' }, beginAtZero: true },
+                                    },
+                                }}
+                                height={400}
+                                width={600}
+                            />
                         </div>
                     </div>
+                </div>
+            </div>
+
+            {/* Export Buttons Section */}
+            <div className="row mt-4">
+                <div className="col-12 text-center">
+                    <button 
+                        className="btn btn-success me-2" 
+                        onClick={exportToExcel}
+                    >
+                        Export to Excel
+                    </button>
+                    <button 
+                        className="btn btn-danger" 
+                        onClick={exportToPDF}
+                    >
+                        Export to PDF
+                    </button>
                 </div>
             </div>
         </div>

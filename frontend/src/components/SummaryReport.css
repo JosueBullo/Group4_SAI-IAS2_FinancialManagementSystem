@@ -1,0 +1,107 @@
+    /* Global Styles */
+body {
+    font-family: 'Roboto', sans-serif;
+    background-color: #f4f7fa;
+    margin: 0;
+    padding: 0;
+}
+
+/* Summary Report Container */
+.summary-report-container {
+    padding: 30px;
+    max-width: 900px;
+    margin: 40px auto;
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Title */
+.summary-title {
+    text-align: center;
+    font-size: 32px;
+    color: #2c3e50;
+    margin-bottom: 20px;
+    font-weight: 600;
+}
+
+/* Buttons */
+.btn {
+    padding: 12px 20px;
+    border-radius: 5px;
+    font-size: 16px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none;
+}
+
+.btn-back {
+    background-color: #FF5722;
+    color: white;
+}
+
+.btn-back:hover {
+    background-color: #e64a19;
+}
+
+.btn-export-pdf {
+    background-color: #4CAF50;
+    color: white;
+    margin-right: 10px;
+}
+
+.btn-export-pdf:hover {
+    background-color: #388e3c;
+}
+
+.btn-export-excel {
+    background-color: #2196F3;
+    color: white;
+}
+
+.btn-export-excel:hover {
+    background-color: #1976D2;
+}
+
+/* Financial Summary */
+.financial-summary h2 {
+    font-size: 22px;
+    color: #2c3e50;
+    margin-bottom: 10px;
+}
+
+.positive-balance {
+    color: green;
+}
+
+.negative-balance {
+    color: red;
+}
+
+.expense-breakdown ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.expense-breakdown li {
+    font-size: 18px;
+    color: #34495e;
+}
+
+/* Charts Container */
+.charts-container {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 30px;
+}
+
+.chart {
+    width: 45%;
+    max-width: 400px;
+}
+
+/* Export Buttons */
+.export-buttons {
+    text-align: center;
+    margin-top: 20px;
+}

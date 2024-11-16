@@ -1,189 +1,3 @@
-
-
-
-// import React, { useState, useEffect, useMemo } from 'react';
-// import axios from 'axios';
-// import jsPDF from 'jspdf'; 
-// import * as XLSX from 'xlsx';
-// import { Bar } from 'react-chartjs-2';
-// import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
-
-// ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
-
-// const IncomePage = () => {
-//     const [incomes, setIncomes] = useState([]);
-//     const [formData, setFormData] = useState({ amount: '', category: '', description: '', date: '' });
-//     const [editingId, setEditingId] = useState(null);
-
-//     useEffect(() => {
-//         fetchIncomes();
-//     }, []);
-
-//     const fetchIncomes = async () => {
-//         try {
-//             const response = await axios.get('http://localhost:8000/api/income/');
-//             setIncomes(response.data);
-//         } catch (error) {
-//             console.error('Error fetching incomes:', error);
-//         }
-//     };
-
-//     const handleInputChange = (e) => {
-//         const { name, value } = e.target;
-//         setFormData((prevData) => ({ ...prevData, [name]: value }));
-//     };
-
-//     const handleSubmit = async (e) => {
-//         e.preventDefault();
-//         try {
-//             if (editingId) {
-//                 await axios.put(`http://localhost:8000/api/income/${editingId}/`, formData);
-//             } else {
-//                 await axios.post('http://localhost:8000/api/income/', formData);
-//             }
-//             fetchIncomes();
-//             setFormData({ amount: '', category: '', description: '', date: '' });
-//             setEditingId(null);
-//         } catch (error) {
-//             console.error('Error saving income:', error);
-//         }
-//     };
-
-//     const handleEdit = (income) => {
-//         setFormData(income);
-//         setEditingId(income.id);
-//     };
-
-//     const handleDelete = async (id) => {
-//         try {
-//             await axios.delete(`http://localhost:8000/api/income/${id}/`);
-//             fetchIncomes();
-//         } catch (error) {
-//             console.error('Error deleting income:', error);
-//         }
-//     };
-
-//     const exportToPDF = () => {
-//         const doc = new jsPDF();
-//         doc.setFontSize(18);
-//         doc.text('Income Report', 14, 20);
-//         let y = 30;
-
-//         incomes.forEach((income) => {
-//             doc.text(`Amount: ${income.amount} | Category: ${income.category} | Description: ${income.description} | Date: ${income.date}`, 14, y);
-//             y += 10;
-//         });
-
-//         doc.save('income-report.pdf');
-//     };
-
-//     const exportToExcel = () => {
-//         const worksheet = XLSX.utils.json_to_sheet(incomes);
-//         const workbook = XLSX.utils.book_new();
-//         XLSX.utils.book_append_sheet(workbook, worksheet, 'Incomes');
-//         XLSX.writeFile(workbook, 'income-report.xlsx');
-//     };
-
-//     const totalIncome = useMemo(() => {
-//         return incomes.reduce((total, income) => total + Number(income.amount), 0);
-//     }, [incomes]);
-
-//     const chartData = useMemo(() => ({
-//         labels: incomes.map(income => income.category),
-//         datasets: [{
-//             label: 'Income Amounts',
-//             data: incomes.map(income => income.amount),
-//             backgroundColor: 'rgba(75, 192, 192, 0.6)',
-//         }],
-//     }), [incomes]);
-
-//     return (
-//         <div style={{ padding: '20px', maxWidth: '800px', margin: 'auto' }}>
-//             <h1>Income Management</h1>
-//             <form onSubmit={handleSubmit} style={{ marginBottom: '20px' }}>
-//                 <input
-//                     type="number"
-//                     name="amount"
-//                     placeholder="Amount"
-//                     value={formData.amount}
-//                     onChange={handleInputChange}
-//                     required
-//                     style={{ marginRight: '10px' }}
-//                 />
-//                 <input
-//                     type="text"
-//                     name="category"
-//                     placeholder="Category"
-//                     value={formData.category}
-//                     onChange={handleInputChange}
-//                     required
-//                     style={{ marginRight: '10px' }}
-//                 />
-//                 <input
-//                     type="text"
-//                     name="description"
-//                     placeholder="Description"
-//                     value={formData.description}
-//                     onChange={handleInputChange}
-//                     style={{ marginRight: '10px' }}
-//                 />
-//                 <input
-//                     type="date"
-//                     name="date"
-//                     value={formData.date}
-//                     onChange={handleInputChange}
-//                     required
-//                     style={{ marginRight: '10px' }}
-//                 />
-//                 <button type="submit">{editingId ? 'Update' : 'Add'} Income</button>
-//             </form>
-
-//             <h2>Incomes List</h2>
-//             <ul style={{ listStyleType: 'none', padding: '0' }}>
-//                 {incomes.map((income) => (
-//                     <li key={income.id} style={{ marginBottom: '10px' }}>
-//                        ₱ {income.amount} - {income.category} - {income.description} - {income.date}
-//                         <button onClick={() => handleEdit(income)} style={{ marginLeft: '10px' }}>Edit</button>
-//                         <button onClick={() => handleDelete(income.id)} style={{ marginLeft: '5px' }}>Delete</button>
-//                     </li>
-//                 ))}
-//             </ul>
-
-//             <button onClick={exportToPDF} style={{ marginRight: '10px' }}>Export to PDF</button>
-//             <button onClick={exportToExcel}>Export to Excel</button>
-
-//             <h2>Total Income: ₱ {totalIncome.toFixed(2)}</h2>
-
-//             <h2>Income Chart</h2>
-//             <div style={{ maxWidth: '600px', margin: 'auto' }}>
-//                 <Bar 
-//                     data={chartData} 
-//                     options={{ 
-//                         responsive: true, 
-//                         maintainAspectRatio: true,
-//                         aspectRatio: 2, // Adjust this value as needed
-//                         scales: {
-//                             x: {
-//                                 title: {
-//                                     display: true,
-//                                     text: 'Category'
-//                                 }
-//                             },
-//                             y: {
-//                                 title: {
-//                                     display: true,
-//                                     text: 'Amount'
-//                                 }
-//                             }
-//                         }
-//                     }} 
-//                 />
-//             </div>
-//         </div>
-//     );
-// };
-
-// export default IncomePage;
 import React, { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -194,6 +8,8 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '@fortawesome/fontawesome-free/css/all.min.css';
 import './Dashboard.css';
+import './Incomepage.css';
+import ReactPaginate from 'react-paginate';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
@@ -201,6 +17,9 @@ const IncomePage = () => {
     const [incomes, setIncomes] = useState([]);
     const [formData, setFormData] = useState({ amount: '', category: '', description: '', date: '' });
     const [editingId, setEditingId] = useState(null);
+    const [error, setError] = useState(null);
+    const [currentPage, setCurrentPage] = useState(0);
+    const itemsPerPage = 5;
 
     useEffect(() => {
         fetchIncomes();
@@ -212,6 +31,7 @@ const IncomePage = () => {
             setIncomes(response.data);
         } catch (error) {
             console.error('Error fetching incomes:', error);
+            setError('Failed to load incomes.');
         }
     };
 
@@ -225,14 +45,17 @@ const IncomePage = () => {
         try {
             if (editingId) {
                 await axios.put(`http://localhost:8000/api/income/${editingId}/`, formData);
+                alert('Income updated successfully!');
             } else {
                 await axios.post('http://localhost:8000/api/income/', formData);
+                alert('Income added successfully!');
             }
             fetchIncomes();
             setFormData({ amount: '', category: '', description: '', date: '' });
             setEditingId(null);
         } catch (error) {
             console.error('Error saving income:', error);
+            setError('Failed to save income.');
         }
     };
 
@@ -244,9 +67,11 @@ const IncomePage = () => {
     const handleDelete = async (id) => {
         try {
             await axios.delete(`http://localhost:8000/api/income/${id}/`);
+            alert('Income deleted successfully!');
             fetchIncomes();
         } catch (error) {
             console.error('Error deleting income:', error);
+            setError('Failed to delete income.');
         }
     };
 
@@ -257,7 +82,11 @@ const IncomePage = () => {
         let y = 30;
 
         incomes.forEach((income) => {
-            doc.text(`Amount: ${income.amount} | Category: ${income.category} | Description: ${income.description} | Date: ${income.date}`, 14, y);
+            doc.text(
+                `Amount: ${income.amount} | Category: ${income.category} | Description: ${income.description} | Date: ${income.date}`,
+                14,
+                y
+            );
             y += 10;
         });
 
@@ -275,137 +104,196 @@ const IncomePage = () => {
         return incomes.reduce((total, income) => total + Number(income.amount), 0);
     }, [incomes]);
 
-    const chartData = useMemo(() => ({
-        labels: incomes.map(income => income.category),
-        datasets: [{
-            label: 'Income Amounts',
-            data: incomes.map(income => income.amount),
-            backgroundColor: 'rgba(75, 192, 192, 0.6)',
-        }],
-    }), [incomes]);
+    const chartData = useMemo(
+        () => ({
+            labels: incomes.map((income) => income.category),
+            datasets: [
+                {
+                    label: 'Income Amounts',
+                    data: incomes.map((income) => income.amount),
+                    backgroundColor: 'rgba(75, 192, 192, 0.6)',
+                },
+            ],
+        }),
+        [incomes]
+    );
+
+    // Paginate the incomes data
+    const currentIncomes = useMemo(() => {
+        const offset = currentPage * itemsPerPage;
+        return incomes.slice(offset, offset + itemsPerPage);
+    }, [incomes, currentPage]);
+
+    const handlePageClick = (data) => {
+        setCurrentPage(data.selected);
+    };
 
     return (
-        <div className="container-fluid dashboard">
-            <header className="text-center my-4">
-                <h1 className="display-4 text-primary">Income Management</h1>
-                <p className="lead text-secondary">Manage and track your income</p>
-            </header>
-
-            <div className="row mb-4 justify-content-center">
-                <div className="col d-flex justify-content-center gap-3">
-                    <Link to="/" className="btn btn-outline-secondary btn-lg">
-                        <i className="fas fa-arrow-left me-2"></i> Back to Dashboard
+        <div className="container-fluid py-4">
+            <header className="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <Link to="/" className="btn btn-outline-secondary btn-sm">
+                        <i className="fas fa-arrow-left me-2"></i>Back to Dashboard
                     </Link>
                 </div>
-            </div>
+                <h1 className="h4 text-primary mb-0">Income Management</h1>
+            </header>
 
-            <form onSubmit={handleSubmit} className="row g-3 mb-4 justify-content-center">
-                <div className="col-md-2">
-                    <input
-                        type="number"
-                        name="amount"
-                        className="form-control"
-                        placeholder="Amount"
-                        value={formData.amount}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-                <div className="col-md-2">
-                    <input
-                        type="text"
-                        name="category"
-                        className="form-control"
-                        placeholder="Category"
-                        value={formData.category}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-                <div className="col-md-2">
-                    <input
-                        type="text"
-                        name="description"
-                        className="form-control"
-                        placeholder="Description"
-                        value={formData.description}
-                        onChange={handleInputChange}
-                    />
-                </div>
-                <div className="col-md-2">
-                    <input
-                        type="date"
-                        name="date"
-                        className="form-control"
-                        value={formData.date}
-                        onChange={handleInputChange}
-                        required
-                    />
-                </div>
-                <div className="col-md-2">
-                    <button type="submit" className="btn btn-primary">
-                        {editingId ? 'Update Income' : 'Add Income'}
-                    </button>
-                </div>
-            </form>
+            {error && <div className="alert alert-danger text-center">{error}</div>}
 
-            <div className="card shadow-lg border-0 mb-4">
-                <div className="card-body">
-                    <h2 className="card-title text-primary text-center">Incomes List</h2>
-                    <ul className="list-group">
-                        {incomes.map((income) => (
-                            <li key={income.id} className="list-group-item d-flex justify-content-between align-items-center">
-                                ₱ {income.amount} - {income.category} - {income.description} - {income.date}
-                                <div>
-                                    <button onClick={() => handleEdit(income)} className="btn btn-outline-secondary btn-sm me-2">
-                                        Edit
-                                    </button>
-                                    <button onClick={() => handleDelete(income.id)} className="btn btn-outline-danger btn-sm">
-                                        Delete
-                                    </button>
+            <div className="row">
+                {/* Form Section */}
+                <div className="col-md-4 mb-4">
+                    <div className="card shadow-sm border-light">
+                        <div className="card-body">
+                            <h2 className="h6 text-dark mb-3">Add / Edit Income</h2>
+                            <form onSubmit={handleSubmit}>
+                                <div className="mb-3">
+                                    <input
+                                        type="number"
+                                        name="amount"
+                                        className="form-control"
+                                        placeholder="Enter amount"
+                                        value={formData.amount}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
                                 </div>
-                            </li>
-                        ))}
-                    </ul>
+                                <div className="mb-3">
+                                    <input
+                                        type="text"
+                                        name="category"
+                                        className="form-control"
+                                        placeholder="Enter category"
+                                        value={formData.category}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <input
+                                        type="text"
+                                        name="description"
+                                        className="form-control"
+                                        placeholder="Enter description"
+                                        value={formData.description}
+                                        onChange={handleInputChange}
+                                    />
+                                </div>
+                                <div className="mb-3">
+                                    <input
+                                        type="date"
+                                        name="date"
+                                        className="form-control"
+                                        value={formData.date}
+                                        onChange={handleInputChange}
+                                        required
+                                    />
+                                </div>
+                                <button type="submit" className="btn btn-primary w-100">
+                                    {editingId ? 'Update Income' : 'Add Income'}
+                                </button>
+                            </form>
+                        </div>
+                    </div>
                 </div>
-            </div>
 
-            <div className="text-center mb-4">
-                <button onClick={exportToPDF} className="btn btn-outline-secondary me-2">
-                    Export to PDF
-                </button>
-                <button onClick={exportToExcel} className="btn btn-outline-secondary">
-                    Export to Excel
-                </button>
-            </div>
+                {/* Table Section */}
+                <div className="col-md-8">
+                    <div className="card shadow-sm border-light mb-4">
+                        <div className="card-body">
+                            <h2 className="h6 text-dark mb-3">Income Records</h2>
+                            <table className="table table-striped">
+                                <thead className="table-light">
+                                    <tr>
+                                        <th>#</th>
+                                        <th>Amount</th>
+                                        <th>Category</th>
+                                        <th>Description</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {currentIncomes.length === 0 ? (
+                                        <tr>
+                                            <td colSpan="6" className="text-center text-muted">
+                                                No income records available. Add a new income to get started.
+                                            </td>
+                                        </tr>
+                                    ) : (
+                                        currentIncomes.map((income, index) => (
+                                            <tr key={income.id}>
+                                                <td>{index + 1 + currentPage * itemsPerPage}</td>
+                                                <td>₱ {income.amount}</td>
+                                                <td>{income.category}</td>
+                                                <td>{income.description}</td>
+                                                <td>{income.date}</td>
+                                                <td>
+                                                    <button
+                                                        onClick={() => handleEdit(income)}
+                                                        className="btn btn-sm btn-outline-secondary me-2"
+                                                    >
+                                                        Edit
+                                                    </button>
+                                                    <button
+                                                        onClick={() => handleDelete(income.id)}
+                                                        className="btn btn-sm btn-outline-danger"
+                                                    >
+                                                        Delete
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))
+                                    )}
+                                </tbody>
+                            </table>
 
-            <div className="card shadow-lg border-0">
-                <div className="card-body text-center">
-                    <h2 className="card-title text-success">Income Chart</h2>
-                    <div style={{ maxWidth: '600px', margin: 'auto' }}>
-                        <Bar 
-                            data={chartData} 
-                            options={{ 
-                                responsive: true, 
-                                maintainAspectRatio: true,
-                                aspectRatio: 2,
-                                scales: {
-                                    x: { title: { display: true, text: 'Category' }},
-                                    y: { title: { display: true, text: 'Amount' }}
-                                }
-                            }} 
-                        />
+                            <ReactPaginate
+                                previousLabel={'Previous'}
+                                nextLabel={'Next'}
+                                breakLabel={'...'}
+                                pageCount={Math.ceil(incomes.length / itemsPerPage)}
+                                marginPagesDisplayed={2}
+                                pageRangeDisplayed={5}
+                                onPageChange={handlePageClick}
+                                containerClassName={'pagination justify-content-center'}
+                                pageClassName={'page-item'}
+                                pageLinkClassName={'page-link'}
+                                previousClassName={'page-item'}
+                                previousLinkClassName={'page-link'}
+                                nextClassName={'page-item'}
+                                nextLinkClassName={'page-link'}
+                                activeClassName={'active'}
+                            />
+                        </div>
                     </div>
                 </div>
             </div>
 
-            <div className="text-center mt-4">
-                <h2 className="text-primary">Total Income: ₱ {totalIncome.toFixed(2)}</h2>
+            {/* Total Income */}
+            <div className="row">
+                <div className="col-md-12">
+                    <div className="card shadow-sm border-light mb-4">
+                        <div className="card-body">
+                            <h2 className="h6 text-dark mb-3">Total Income: ₱ {totalIncome}</h2>
+                            <Bar data={chartData} options={{ responsive: true }} width={300} height={150} />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            {/* Export Buttons */}
+            <div className="d-flex justify-content-center">
+                <button className="btn btn-success me-2" onClick={exportToPDF}>
+                    Export to PDF
+                </button>
+                <button className="btn btn-primary" onClick={exportToExcel}>
+                    Export to Excel
+                </button>
             </div>
         </div>
     );
 };
 
 export default IncomePage;
-
-
