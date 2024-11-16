@@ -6,6 +6,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearSca
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import * as XLSX from 'xlsx';
+import Layout from './Layout'; // Import the Layout component
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
@@ -116,12 +117,24 @@ const SummaryReport = () => {
     };
 
     const exportToExcel = () => {
-        const ws = XLSX.utils.json_to_sheet([
+        const summaryData = [
             { Description: 'Total Income', Amount: totalIncome.toFixed(2) },
             { Description: 'Total Expenses', Amount: totalExpenses.toFixed(2) },
             { Description: 'Balance', Amount: (totalIncome - totalExpenses).toFixed(2) },
-        ]);
+        ];
 
+        const categoryData = Object.entries(expenseCategories).map(([category, amount]) => ({
+            Category: category,
+            Amount: amount.toFixed(2),
+        }));
+
+        const wsData = [
+            ...summaryData.map((row) => ({ ...row, Category: '' })),
+            { Description: '', Amount: '', Category: 'Expenses by Category' },
+            ...categoryData,
+        ];
+
+        const ws = XLSX.utils.json_to_sheet(wsData);
         const wb = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(wb, ws, 'Summary Report');
         XLSX.writeFile(wb, 'summary-report.xlsx');
@@ -136,47 +149,49 @@ const SummaryReport = () => {
     }
 
     return (
-        <div style={{ padding: '20px', margin: 'auto', width: '90vw' }} id="summaryReport">
-            <div style={{ display: 'flex', justifyContent: 'start', alignItems: 'center', marginBottom: '10px' }}>
-                <button onClick={() => navigate('/')} style={{ padding: '8px 15px', fontSize: '12px', backgroundColor: '#FF5722', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginRight: '10px' }}>
-                    Back to Home
-                </button>
-                <button onClick={exportToPDF} style={{ padding: '8px 12px', fontSize: '12px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', marginRight: '10px' }}>
-                    Export to PDF
-                </button>
-                <button onClick={exportToExcel} style={{ padding: '8px 12px', fontSize: '12px', backgroundColor: '#2196F3', color: 'white', border: 'none', borderRadius: '4px' }}>
-                    Export to Excel
-                </button>
-            </div>
-            
-            <h1 style={{ textAlign: 'center', fontSize: '18px', color: '#333', marginBottom: '10px' }}>Summary Report</h1>
-            
-            <div style={{ fontSize: '14px', marginBottom: '15px', backgroundColor: '#f1f1f1', padding: '15px', borderRadius: '5px' }}>
-                <p>Total Income: <strong>${totalIncome.toFixed(2)}</strong></p>
-                <p>Total Expenses: <strong>${totalExpenses.toFixed(2)}</strong></p>
-                <p style={{ color: totalIncome - totalExpenses < 0 ? 'red' : 'green' }}>Balance: <strong>${(totalIncome - totalExpenses).toFixed(2)}</strong></p>
-                <div>
-                    <h4>Expense Breakdown by Category:</h4>
-                    <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
-                        {Object.entries(expenseCategories).map(([category, amount]) => (
-                            <li key={category}>
-                                {category}: ${amount.toFixed(2)}
-                            </li>
-                        ))}
-                    </ul>
+        <Layout>
+            <div style={{ padding: '20px', margin: 'auto', width: '90vw' }} id="summaryReport">
+                <div style={{ display: 'flex', justifyContent: 'start', alignItems: 'center', marginBottom: '10px' }}>
+                    <button onClick={() => navigate('/')} style={{ padding: '8px 15px', fontSize: '12px', backgroundColor: '#FF5722', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginRight: '10px' }}>
+                        Back to Home
+                    </button>
+                    <button onClick={exportToPDF} style={{ padding: '8px 12px', fontSize: '12px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', marginRight: '10px' }}>
+                        Export to PDF
+                    </button>
+                    <button onClick={exportToExcel} style={{ padding: '8px 12px', fontSize: '12px', backgroundColor: '#2196F3', color: 'white', border: 'none', borderRadius: '4px' }}>
+                        Export to Excel
+                    </button>
                 </div>
-            </div>
+                
+                <h1 style={{ textAlign: 'center', fontSize: '18px', color: '#333', marginBottom: '10px' }}>Summary Report</h1>
+                
+                <div style={{ fontSize: '14px', marginBottom: '15px', backgroundColor: '#f1f1f1', padding: '15px', borderRadius: '5px' }}>
+                    <p>Total Income: <strong>${totalIncome.toFixed(2)}</strong></p>
+                    <p>Total Expenses: <strong>${totalExpenses.toFixed(2)}</strong></p>
+                    <p style={{ color: totalIncome - totalExpenses < 0 ? 'red' : 'green' }}>Balance: <strong>${(totalIncome - totalExpenses).toFixed(2)}</strong></p>
+                    <div>
+                        <h4>Expense Breakdown by Category:</h4>
+                        <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
+                            {Object.entries(expenseCategories).map(([category, amount]) => (
+                                <li key={category}>
+                                    {category}: ${amount.toFixed(2)}
+                                </li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
 
-            <div style={{ textAlign: 'center', fontSize: '15px', margin: '15px 0', color: '#666' }}>Financial Overview</div>
-            <div style={{ display: 'flex', justifyContent: 'space-around' }}>
-                <div style={{ width: '40%' }}>
-                    <Pie data={chartData} />
-                </div>
-                <div style={{ width: '40%' }}>
-                    <Bar data={categoryChartData} options={{ maintainAspectRatio: true, responsive: true }} />
+                <div style={{ textAlign: 'center', fontSize: '15px', margin: '15px 0', color: '#666' }}>Financial Overview</div>
+                <div style={{ display: 'flex', justifyContent: 'space-around' }}>
+                    <div style={{ width: '40%' }}>
+                        <Pie data={chartData} />
+                    </div>
+                    <div style={{ width: '40%' }}>
+                        <Bar data={categoryChartData} options={{ maintainAspectRatio: true, responsive: true }} />
+                    </div>
                 </div>
             </div>
-        </div>
+        </Layout>
     );
 };
 

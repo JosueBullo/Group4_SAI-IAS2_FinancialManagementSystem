@@ -91,3 +91,48 @@ button {
     width: 100% !important;
     height: 100% !important;
 }
+/* Adjust the spacing of navbar items */
+.navbar-nav .nav-link {
+    padding: 15px 25px; /* Increase spacing around each link */
+    margin: 0 10px;      /* Add more space between links */
+    font-size: 1.1rem;   /* Slightly larger font for better visibility */
+    transition: all 0.3s ease-in-out; /* Smooth animation for hover effects */
+}
+
+/* Hover effects */
+.navbar-nav .nav-link:hover {
+    background-color: rgba(255, 255, 255, 0.1); /* Subtle background color on hover */
+    border-radius: 8px; /* Slightly more rounded corners for hover background */
+    color: #ffdd57; /* Change text color on hover */
+    text-decoration: none; /* Remove underline on hover */
+}
+
+/* Active link styling */
+.navbar-nav .nav-link.active {
+    background-color: #ffffff; /* Active link background */
+    color: #0d6efd; /* Text color for active link */
+    border-radius: 8px;
+    font-weight: bold; /* Make the active link bold */
+}
+
+/* Navbar brand styling */
+.navbar-brand {
+    font-size: 1.8rem; /* Increase font size for brand */
+    font-weight: bold;
+    color: #ffffff;
+    text-shadow: 1px 1px 2px rgba(0, 0, 0, 0.5);
+    transition: color 0.3s ease-in-out;
+}
+
+.navbar-brand:hover {
+    color: #ffdd57; /* Change color on hover */
+    text-decoration: none;
+}
+
+/* Navbar responsiveness adjustments */
+@media (max-width: 768px) {
+    .navbar-nav .nav-link {
+        padding: 15px; /* Adjust padding for smaller screens */
+        text-align: center; /* Center align text for collapsed menu */
+    }
+}
