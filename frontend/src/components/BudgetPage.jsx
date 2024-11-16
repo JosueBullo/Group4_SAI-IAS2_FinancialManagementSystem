@@ -7,6 +7,7 @@ import './Budget.css';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
 import ExpenseBudgetComparisonChart from './CategoryBudget';  // Import the chart
+import ExpenseBudgetComparisonChart1 from './BudgetChart';  // Import the chart
 import Layout from './Layout';  // Import Layout
 
 // Register chart elements
@@ -293,6 +294,14 @@ const BudgetPage = () => {
                 </div>
 
             </div>
+            {/* Budget Comparison Chart */}
+            <div className="row mt-4">
+                    <div className="col-12">
+                        <ExpenseBudgetComparisonChart1 budgets={budgets} expenses={expenses} />
+                    </div>
+                </div>
+
+          
         </Layout>
     );
 };

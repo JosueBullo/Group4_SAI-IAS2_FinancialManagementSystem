@@ -341,16 +341,39 @@
         const exportToPDF = () => {
             const doc = new jsPDF();
             doc.setFontSize(13);
+        
+            // Add Title
             doc.text('Expense Report', 14, 20);
+        
+            // Create a header for the table
             let y = 30;
-
+            doc.setFontSize(12);
+            doc.text('Amount', 14, y);
+            doc.text('Category', 60, y);
+            doc.text('Description', 120, y);
+            doc.text('Date', 170, y);
+            y += 5;  // Adding space between header and data
+        
+            // Add Expenses Data
             expenses.forEach((expense) => {
-                doc.text(`Amount: ${expense.amount} | Category: ${expense.category} | Description: ${expense.description} | Date: ${expense.date}`, 14, y);
+                doc.text(`₱ ${expense.amount}`, 14, y);
+                doc.text(expense.category, 60, y);
+                doc.text(expense.description, 120, y);
+                doc.text(expense.date, 170, y);
                 y += 10;
             });
-
+        
+            // Add Total Expense at the bottom
+            const totalExpense = expenses.reduce((total, expense) => total + Number(expense.amount), 0);
+            y += 10;  // Adding space before total
+            doc.setFontSize(14);
+            doc.text('Total Expense:', 14, y);
+            doc.text(`₱ ${totalExpense}`, 60, y);
+        
+            // Save the PDF
             doc.save('expense-report.pdf');
         };
+        
 
         const exportToExcel = () => {
             const worksheet = XLSX.utils.json_to_sheet(expenses);
