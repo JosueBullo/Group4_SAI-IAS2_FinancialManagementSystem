@@ -1,26 +1,26 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-import { Bar } from 'react-chartjs-2';
-import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
 import { useNavigate } from 'react-router-dom';
 import './Budget.css';
 import * as XLSX from 'xlsx';
 import { jsPDF } from 'jspdf';
-import ExpenseBudgetComparisonChart from './CategoryBudget';  // Import the chart
-import ExpenseBudgetComparisonChart1 from './BudgetChart';  // Import the chart
 import Layout from './Layout';  // Import Layout
-
-// Register chart elements
-ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
+import CategoryBudget from './CategoryBudget';  // Adjust the path based on your folder structure
+// import BudgetChart2 from './BudgetChart2';  // Adjust the path based on your folder structure
+// import ExpenseBudgetComparisonChart from './ExpenseBudgetComparisonChart';  // Import the new chart
 
 const BudgetPage = () => {
     const [budgets, setBudgets] = useState([]);
     const [newEntry, setNewEntry] = useState({ category: '', amount: '', month: '' });
     const [editingId, setEditingId] = useState(null);
     const [error, setError] = useState(null);
-    const [expenses, setExpenses] = useState([]);  // You may also need to fetch expenses
-    const categories = ['Food', 'Entertainment', 'Rent', 'Utilities', 'Transportation', 'Healthcare'];
+    const [expenses, setExpenses] = useState([]);
     const navigate = useNavigate();
+
+    const categoryOptions = [
+        'Food', 'Transportation', 'Entertainment', 'Bills', 'Health', 'Education', 
+        'Water', 'Water Bill', 'Electric Bill'
+    ];
 
     const fetchBudgets = async () => {
         try {
@@ -34,7 +34,7 @@ const BudgetPage = () => {
     const fetchExpenses = async () => {
         try {
             const response = await axios.get('http://localhost:8000/api/expenses/');
-            setExpenses(response.data); // Make sure you have the expenses data
+            setExpenses(response.data);
         } catch (error) {
             console.error('Error fetching expenses:', error);
         }
@@ -42,7 +42,7 @@ const BudgetPage = () => {
 
     useEffect(() => {
         fetchBudgets();
-        fetchExpenses();  // Fetch expenses on mount
+        fetchExpenses();
     }, []);
 
     const handleChange = (e) => {
@@ -85,33 +85,6 @@ const BudgetPage = () => {
         }
     };
 
-    const prepareChartData = () => {
-        const monthlyData = {};
-        const allCategories = new Set();
-
-        budgets.forEach((budget) => {
-            const monthKey = budget.month;
-            if (!monthlyData[monthKey]) monthlyData[monthKey] = {};
-            if (!monthlyData[monthKey][budget.category]) monthlyData[monthKey][budget.category] = 0;
-            monthlyData[monthKey][budget.category] += budget.amount;
-            allCategories.add(budget.category);
-        });
-
-        const labels = Object.keys(monthlyData).sort();
-        const datasets = Array.from(allCategories).map((category) => ({
-            label: category,
-            data: labels.map((month) => monthlyData[month][category] || 0),
-            backgroundColor: `hsl(${Math.random() * 360}, 70%, 60%)`,
-            borderColor: 'black',
-            borderWidth: 1,
-        }));
-
-        return { labels, datasets };
-    };
-
-    const { labels, datasets } = prepareChartData();
-
-    // Export to Excel function
     const exportToExcel = () => {
         const ws = XLSX.utils.json_to_sheet(budgets);
         const wb = XLSX.utils.book_new();
@@ -119,7 +92,6 @@ const BudgetPage = () => {
         XLSX.writeFile(wb, 'budgets.xlsx');
     };
 
-    // Export to PDF function
     const exportToPDF = () => {
         const doc = new jsPDF();
         doc.setFontSize(12);
@@ -138,7 +110,6 @@ const BudgetPage = () => {
     return (
         <Layout>
             <div className="container-fluid bg-light py-5 min-vh-100">
-                {/* Header Section */}
                 <div className="row mb-4">
                     <div className="col-12 text-center">
                         <h1 className="display-4 text-primary font-weight-bold small-title">Monthly Budget</h1>
@@ -146,7 +117,6 @@ const BudgetPage = () => {
                     </div>
                 </div>
 
-                {/* Back to Dashboard Button */}
                 <div className="row mb-4">
                     <div className="col-12 text-start">
                         <button 
@@ -158,7 +128,6 @@ const BudgetPage = () => {
                     </div>
                 </div>
 
-                {/* Add/Edit Budget Form Section */}
                 <div className="row">
                     <div className="col-lg-6 col-md-12 mb-4">
                         <div className="card shadow-lg rounded">
@@ -181,7 +150,7 @@ const BudgetPage = () => {
                                             required
                                         />
                                         <datalist id="category-suggestions">
-                                            {categories.map((category, index) => (
+                                            {categoryOptions.map((category, index) => (
                                                 <option key={index} value={category} />
                                             ))}
                                         </datalist>
@@ -214,22 +183,12 @@ const BudgetPage = () => {
                                         <button type="submit" className="btn btn-success">
                                             {editingId ? 'Update Entry' : 'Add Entry'}
                                         </button>
-                                        {editingId && (
-                                            <button
-                                                type="button"
-                                                onClick={() => setEditingId(null)}
-                                                className="btn btn-secondary"
-                                            >
-                                                Cancel Edit
-                                            </button>
-                                        )}
                                     </div>
                                 </form>
                             </div>
                         </div>
                     </div>
 
-                    {/* Budget Entries Table Section */}
                     <div className="col-lg-6 col-md-12 mb-4">
                         <div className="card shadow-lg rounded">
                             <div className="card-header bg-primary text-white">
@@ -274,7 +233,13 @@ const BudgetPage = () => {
                     </div>
                 </div>
 
-                {/* Export Buttons Section */}
+                {/* Add Expense-Budget Comparison Chart */}
+                <div className="row mt-4">
+                    <div className="col-12">
+                        <CategoryBudget expenses={expenses} budgets={budgets} />
+                    </div>
+                </div>
+
                 <div className="row mt-4">
                     <div className="col-12">
                         <button onClick={exportToExcel} className="btn btn-success me-2">
@@ -285,23 +250,7 @@ const BudgetPage = () => {
                         </button>
                     </div>
                 </div>
-
-                {/* Budget Comparison Chart */}
-                <div className="row mt-4">
-                    <div className="col-12">
-                        <ExpenseBudgetComparisonChart budgets={budgets} expenses={expenses} />
-                    </div>
-                </div>
-
             </div>
-            {/* Budget Comparison Chart */}
-            <div className="row mt-4">
-                    <div className="col-12">
-                        <ExpenseBudgetComparisonChart1 budgets={budgets} expenses={expenses} />
-                    </div>
-                </div>
-
-          
         </Layout>
     );
 };
