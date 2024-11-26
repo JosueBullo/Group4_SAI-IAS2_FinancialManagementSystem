@@ -6,6 +6,7 @@ import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Toolti
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const ExpenseBudgetComparisonChart = ({ expenses, budgets }) => {
+    console.log("buds", budgets)
     const [selectedCategory, setSelectedCategory] = useState('');
     const [selectedMonth, setSelectedMonth] = useState('');
 

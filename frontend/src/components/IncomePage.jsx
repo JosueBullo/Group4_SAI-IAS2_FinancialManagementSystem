@@ -322,14 +322,33 @@ const IncomePage = () => {
     const [currentPage, setCurrentPage] = useState(0);
     const itemsPerPage = 5;
 
+    // Fetch user ID from localStorage once at the start
+    const [userId, setUserId] = useState(null);
+
     useEffect(() => {
-        fetchIncomes();
-    }, []);
+        const storedUserId = localStorage.getItem('userId');
+        if (storedUserId) {
+            setUserId(storedUserId);
+            setFormData((prevData) => ({
+                ...prevData,
+                user: storedUserId, // Add userId to the formData state
+            }));
+        } else {
+            setError('No user ID found in localStorage');
+        }
+    }, []); // Empty array ensures this runs only once on mount
+
+    useEffect(() => {
+        if (userId) {
+            fetchIncomes();
+        }
+    }, [userId]); // Fetch incomes when userId is available
 
     const fetchIncomes = async () => {
         try {
             const response = await axios.get('http://localhost:8000/api/income/');
-            setIncomes(response.data);
+            const filteredIncomes = response.data.filter((income) => income.user == userId);
+            setIncomes(filteredIncomes);
         } catch (error) {
             console.error('Error fetching incomes:', error);
             setError('Failed to load incomes.');
@@ -352,7 +371,7 @@ const IncomePage = () => {
                 alert('Income added successfully!');
             }
             fetchIncomes();
-            setFormData({ amount: '', category: '', description: '', date: '' });
+            setFormData({ amount: '', category: '', description: '', date: '', user: userId });
             setEditingId(null);
         } catch (error) {
             console.error('Error saving income:', error);
@@ -419,7 +438,6 @@ const IncomePage = () => {
         [incomes]
     );
 
-    // Paginate the incomes data
     const currentIncomes = useMemo(() => {
         const offset = currentPage * itemsPerPage;
         return incomes.slice(offset, offset + itemsPerPage);
@@ -513,6 +531,7 @@ const IncomePage = () => {
                                             <th>Category</th>
                                             <th>Description</th>
                                             <th>Date</th>
+                                            <th>User</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
@@ -525,27 +544,30 @@ const IncomePage = () => {
                                             </tr>
                                         ) : (
                                             currentIncomes.map((income, index) => (
-                                                <tr key={income.id}>
-                                                    <td>{index + 1 + currentPage * itemsPerPage}</td>
-                                                    <td>₱ {income.amount}</td>
-                                                    <td>{income.category}</td>
-                                                    <td>{income.description}</td>
-                                                    <td>{income.date}</td>
-                                                    <td>
-                                                        <button
-                                                            onClick={() => handleEdit(income)}
-                                                            className="btn btn-sm btn-outline-secondary me-2"
-                                                        >
-                                                            Edit
-                                                        </button>
-                                                        <button
-                                                            onClick={() => handleDelete(income.id)}
-                                                            className="btn btn-sm btn-outline-danger"
-                                                        >
-                                                            Delete
-                                                        </button>
-                                                    </td>
-                                                </tr>
+                                                income.user == userId ? (
+                                                    <tr key={income.id}>
+                                                        <td>{index + 1 + currentPage * itemsPerPage}</td>
+                                                        <td>₱ {income.amount}</td>
+                                                        <td>{income.category}</td>
+                                                        <td>{income.description}</td>
+                                                        <td>{income.date}</td>
+                                                        <td>{income.user}</td>
+                                                        <td>
+                                                            <button
+                                                                className="btn btn-warning btn-sm"
+                                                                onClick={() => handleEdit(income)}
+                                                            >
+                                                                Edit
+                                                            </button>
+                                                            <button
+                                                                className="btn btn-danger btn-sm"
+                                                                onClick={() => handleDelete(income.id)}
+                                                            >
+                                                                Delete
+                                                            </button>
+                                                        </td>
+                                                    </tr>
+                                                ) : null
                                             ))
                                         )}
                                     </tbody>
@@ -600,4 +622,3 @@ const IncomePage = () => {
 };
 
 export default IncomePage;
-    

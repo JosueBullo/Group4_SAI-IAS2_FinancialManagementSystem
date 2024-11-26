@@ -60,3 +60,15 @@ button:hover {
     color: #ff4d4d;
     font-weight: bold;
 }
+
+.login-link {
+    margin-top: 10px;
+    text-align: center;
+}
+
+.login-link a {
+    text-decoration: none;
+    color: #007bff;
+    font-weight: bold;
+}
+

@@ -203,3 +203,15 @@ footer {
     font-size: 1.5rem;
 }
 
+/* Optional: Style for category input and dropdown */
+input[list="category-suggestions"] {
+    background-color: #fff; /* White background for the input field */
+    border: 1px solid #ccc; /* Light gray border */
+    padding: 8px 12px; /* Padding inside the input */
+}
+
+datalist {
+    max-height: 150px; /* Limit the height of the dropdown */
+    overflow-y: auto; /* Enable scrolling if the list is long */
+    width: 100%; /* Make the dropdown match the input width */
+}

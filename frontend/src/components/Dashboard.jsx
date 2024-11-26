@@ -344,36 +344,39 @@ const Dashboard = () => {
 
     useEffect(() => {
         const fetchIncomes = async () => {
-            try {
-                const response = await axios.get('http://localhost:8000/api/income/');
-                setIncomes(response.data);
-            } catch (error) {
-                console.error('Error fetching incomes:', error);
-            }
+          try {
+            const response = await axios.get('http://localhost:8000/api/income/');
+            const filteredIncomes = response.data.filter((income) => income.user == localStorage.getItem('userId'));
+            setIncomes(filteredIncomes);
+          } catch (error) {
+            console.error('Error fetching incomes:', error);
+          }
         };
-
+    
         const fetchExpenses = async () => {
-            try {
-                const response = await axios.get('http://localhost:8000/api/expenses/');
-                setExpenses(response.data);
-            } catch (error) {
-                console.error('Error fetching expenses:', error);
-            }
+          try {
+            const response = await axios.get('http://localhost:8000/api/expenses/');
+            const filteredExpenses = response.data.filter((expense) => expense.user == localStorage.getItem('userId'));
+            setExpenses(filteredExpenses);
+          } catch (error) {
+            console.error('Error fetching expenses:', error);
+          }
         };
-
+    
         const fetchBudgets = async () => {
-            try {
-                const response = await axios.get('http://localhost:8000/api/budget/');
-                setBudgets(response.data);
-            } catch (error) {
-                console.error('Error fetching budgets:', error);
-            }
+          try {
+            const response = await axios.get('http://localhost:8000/api/budget/');
+            const filteredBudgets = response.data.filter((budget) => budget.user == localStorage.getItem('userId'));
+            setBudgets(filteredBudgets);
+          } catch (error) {
+            console.error('Error fetching budgets:', error);
+          }
         };
-
+    
         fetchIncomes();
         fetchExpenses();
         fetchBudgets();
-    }, []);
+      }, []); 
 
     const totalIncome = incomes.reduce((acc, income) => acc + parseFloat(income.amount || 0), 0);
     const totalExpense = expenses.reduce((acc, expense) => acc + parseFloat(expense.amount || 0), 0);

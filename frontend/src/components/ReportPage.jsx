@@ -6,7 +6,7 @@ import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearSca
 import jsPDF from 'jspdf';
 import html2canvas from 'html2canvas';
 import * as XLSX from 'xlsx';
-import Layout from './Layout'; // Import the Layout component
+import Layout from './Layout';
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement);
 
@@ -20,13 +20,20 @@ const SummaryReport = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
 
+    const userId = localStorage.getItem('userId'); // Get user ID from localStorage
+    const username = localStorage.getItem('username'); // Get username from localStorage
+
     const fetchData = async () => {
         try {
             const incomeResponse = await axios.get('http://127.0.0.1:8000/api/income/');
             const expensesResponse = await axios.get('http://127.0.0.1:8000/api/expenses/');
-            
-            setIncome(incomeResponse.data);
-            setExpenses(expensesResponse.data);
+
+            // Filter data based on user ID
+            const filteredIncome = incomeResponse.data.filter((item) => item.user === parseInt(userId));
+            const filteredExpenses = expensesResponse.data.filter((item) => item.user === parseInt(userId));
+
+            setIncome(filteredIncome);
+            setExpenses(filteredExpenses);
         } catch (error) {
             console.error('Error fetching data:', error);
             setError('Failed to fetch data. Please try again later.');
@@ -60,11 +67,11 @@ const SummaryReport = () => {
         datasets: [
             {
                 label: 'Financial Summary',
-                data: [totalIncome, totalExpenses, totalIncome - totalExpenses], // Remaining balance calculation
+                data: [totalIncome, totalExpenses, totalIncome - totalExpenses],
                 backgroundColor: [
-                    'rgba(75, 192, 192, 0.6)', // Total Income
-                    'rgba(255, 99, 132, 0.6)', // Total Expenses
-                    'rgba(153, 102, 255, 0.6)', // Remaining Balance
+                    'rgba(75, 192, 192, 0.6)',
+                    'rgba(255, 99, 132, 0.6)',
+                    'rgba(153, 102, 255, 0.6)',
                 ],
                 borderColor: [
                     'rgba(75, 192, 192, 1)',
@@ -75,7 +82,7 @@ const SummaryReport = () => {
             },
         ],
     };
-    
+
     const categoryChartData = {
         labels: Object.keys(expenseCategories),
         datasets: [
@@ -153,7 +160,7 @@ const SummaryReport = () => {
             <div style={{ padding: '20px', margin: 'auto', width: '90vw' }} id="summaryReport">
                 <div style={{ display: 'flex', justifyContent: 'start', alignItems: 'center', marginBottom: '10px' }}>
                     <button onClick={() => navigate('/')} style={{ padding: '8px 15px', fontSize: '12px', backgroundColor: '#FF5722', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', marginRight: '10px' }}>
-                        Back to Home
+                        Back to Dashboard
                     </button>
                     <button onClick={exportToPDF} style={{ padding: '8px 12px', fontSize: '12px', backgroundColor: '#4CAF50', color: 'white', border: 'none', borderRadius: '4px', marginRight: '10px' }}>
                         Export to PDF
@@ -162,19 +169,43 @@ const SummaryReport = () => {
                         Export to Excel
                     </button>
                 </div>
-                
+
                 <h1 style={{ textAlign: 'center', fontSize: '18px', color: '#333', marginBottom: '10px' }}>Summary Report</h1>
-                
-                <div style={{ fontSize: '14px', marginBottom: '15px', backgroundColor: '#f1f1f1', padding: '15px', borderRadius: '5px' }}>
-                    <p>Total Income: <strong>${totalIncome.toFixed(2)}</strong></p>
-                    <p>Total Expenses: <strong>${totalExpenses.toFixed(2)}</strong></p>
-                    <p style={{ color: totalIncome - totalExpenses < 0 ? 'red' : 'green' }}>Balance: <strong>${(totalIncome - totalExpenses).toFixed(2)}</strong></p>
+
+                {/* Display username */}
+                <div style={{ fontSize: '16px', marginBottom: '20px' }}>
+                    <p><strong>USER:{username}</strong></p>
+                </div>
+
+                <div
+                    style={{
+                        fontSize: '18px', // Increased font size
+                        marginBottom: '15px',
+                        backgroundColor: '#f1f1f1',
+                        padding: '15px',
+                        borderRadius: '5px',
+                    }}
+                >
+                    <p>
+                        Total Income: <strong>₱{totalIncome.toFixed(2)}</strong>
+                    </p>
+                    <p>
+                        Total Expenses: <strong>₱{totalExpenses.toFixed(2)}</strong>
+                    </p>
+                    <p
+                        style={{
+                            color: totalIncome - totalExpenses < 0 ? 'red' : 'green',
+                            fontSize: '20px', // Larger font size for balance
+                        }}
+                    >
+                        Balance: <strong>₱{(totalIncome - totalExpenses).toFixed(2)}</strong>
+                    </p>
                     <div>
-                        <h4>Expense Breakdown by Category:</h4>
-                        <ul style={{ listStyleType: 'none', padding: 0, fontSize: '12px' }}>
+                        <h4 style={{ fontSize: '20px' }}>Expense Breakdown by Category:</h4>
+                        <ul style={{ listStyleType: 'none', padding: 0, fontSize: '16px' }}>
                             {Object.entries(expenseCategories).map(([category, amount]) => (
                                 <li key={category}>
-                                    {category}: ${amount.toFixed(2)}
+                                    {category}: ₱{amount.toFixed(2)}
                                 </li>
                             ))}
                         </ul>

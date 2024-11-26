@@ -1,8 +1,10 @@
 # api/models.py
 from django.db import models
+from django.contrib.auth.models import User
 
 
 class Expense(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default="")
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.CharField(max_length=255)
     description = models.TextField(blank=True)
@@ -13,6 +15,7 @@ class Expense(models.Model):
     
 
 class Income(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default="")
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     category = models.CharField(max_length=255, default='Uncategorized')  # Provide a default value
     description = models.TextField(blank=True, null=True)
@@ -22,6 +25,7 @@ class Income(models.Model):
         return f"{self.amount} - {self.category}"
     
 class Budget(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, default="")
     category = models.CharField(max_length=255)
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     month  = models.DateField()
